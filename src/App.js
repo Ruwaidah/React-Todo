@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import TodoForm from './components/TodoComponents/TodoForm'
 import TodoList from './components/TodoComponents/TodoList';
+import './components/TodoComponents/Todo.css'
+
 
 class App extends React.Component {
 
@@ -9,62 +11,66 @@ class App extends React.Component {
   // this component is going to take care of state, and any change handlers you need to work with your state
   constructor() {
     super();
-    this.state = {
-      newTask: [{
-        task: "",
-        id : Date.now(),
-        completed: false
-      }],
-      input: ''
-
+    this.state={
+      todoList: [],
+      input: '',
     }
+  };
+
+  handleChanges = (e) => {
+    console.log(`handleChange Running`);
+    this.setState({ input: e.target.value });
+  } 
+  
+  addTodo = (e) => {
+    e.preventDefault();
+    console.log(`AddTodo Running`);
+    const newTodo = {
+      name: this.state.input,
+      id: Date.now(),
+      completed: false
+    };
+    this.setState({
+      todoList: [...this.state.todoList, newTodo],
+      input: ''
+    });
   }
 
-    onValueChange = (event) => {
-      this.setState({
-        input:  event.target.value,
-                      id: Date.now()
-        })
-      }
-    onClickAddTask = () => {
-      this.setState({ 
-       newTask: [...this.state.newTask, {
-         task: this.state.input,
-         id: Date.now(),
-         completed: false
-       }]
-      }
-        )
-      document.querySelector("input").value = "";
-    }
+  toggleItem = todoId => {
+    this.setState({
+      todoList: this.state.todoList.map(todo => {
+        if (todoId === todo.id) {
+          return {
+            ...todo,
+            completed: !todo.completed
+          }
+        };
+        return todo;
+      })
+    })
+  }
 
-    onClickClearTask = (event) => {
-      event.completed = !(event.completed)
-      console.log(event)
+  clear = (e) => {
+    e.preventDefault();
+    this.setState({
+      todoList: this.state.todoList.filter(item => !item.completed)
+    });
+  }
 
-      };
-      checkcompo = (bool) => {
-        console.log(bool)
-        return bool.completed === false
-      }
-
-      deleteTaskComp = () => {
-        let myobj = Object.assign({}, this.state.newTask.filter(this.checkcompo))
-        this.setState({
-          newTask: this.state.newTask.filter(this.checkcompo)
-        })
-        
-      }
 
   render() {
     return (
-      <div>
-        <h2>Welcome to your Todo App!</h2>
-        <TodoList theArray = {this.state.newTask} checktask = {this.onClickClearTask}/>
-        <TodoForm newtask = {this.onValueChange}  cilckadd = {this.onClickAddTask} delete = {this.deleteTaskComp} />
-    </div>
+      <div className="App">
+        <div className="header">
+          <h1>Todo List</h1>
+        </div>
+        <TodoForm input={this.state.input} handleChanges={this.handleChanges} addTodo={this.addTodo} />
+        <TodoList todoList={this.state.todoList} toggleItem={this.toggleItem} />
+        <button onClick={this.clear} className = "clear">Clear All Task</button>
+      </div>
     );
   }
+
 }
 
 export default App;
